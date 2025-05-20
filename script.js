@@ -19,6 +19,7 @@ const pi =
   "01000313783875288658753320838142061717766914730359" +
   "82534904287554687311595628638823537875937519577818" +
   "577805321712268066130019278766111959092164201989";
+let startIndex = 0;
 
 const maxDigits = pi.length; // Show as many boxes as pi digits
 let currentIndex = 0;
@@ -33,16 +34,29 @@ function updateMemorizedCount() {
 }
 
 function initializeGrid() {
-    const grid = document.getElementById("digit-grid");
-    grid.innerHTML = "";
-    for (let i = 0; i < maxDigits; i++) {
-        const box = document.createElement("div");
-        box.className = "digit-box";
-        box.id = `digit-${i}`;
-        box.textContent = ""; // Initially blank
-        grid.appendChild(box);
-    }
+  const grid = document.getElementById("digit-grid");
+  grid.innerHTML = "";
+
+  // Show all digits before the selected starting point (grayed out)
+  for (let i = 0; i < startIndex; i++) {
+    const box = document.createElement("div");
+    box.className = "digit-box";
+    box.textContent = pi[i];
+    box.style.color = "#ccc"; // Light gray
+    grid.appendChild(box);
+  }
+
+  // Show blank boxes for the digits to be guessed
+  for (let i = startIndex; i < pi.length; i++) {
+    const box = document.createElement("div");
+    box.className = "digit-box";
+    box.id = `digit-${i}`;
+    box.textContent = ""; // Empty for guessing
+    grid.appendChild(box);
+  }
 }
+
+
 
 function checkInput() {
     const input = document.getElementById('input').value;
@@ -56,10 +70,10 @@ function checkInput() {
         document.getElementById('feedback').textContent = "Correct!";
         document.getElementById('input').value = "";
 
-        // 🎉 Check if all digits are complete
+        // 🎉 If reached the end
         if (currentIndex === pi.length) {
             document.getElementById('feedback').textContent =
-                "🎉 Congratulations! You memorized all 300 digits of Pi!";
+                "🎉 Congratulations! You memorized all the digits of Pi you started with!";
             document.getElementById('input').disabled = true;
         }
     } else {
@@ -77,6 +91,7 @@ function checkInput() {
     updateLivesDisplay();
 }
 
+
 function fillDigit(index, value, color = "black") {
     const box = document.getElementById(`digit-${index}`);
     if (box) {
@@ -86,7 +101,7 @@ function fillDigit(index, value, color = "black") {
 }
 
 function revealPiWithColors() {
-    for (let i = 0; i < maxDigits; i++) {
+    for (let i = startIndex; i < pi.length; i++) {
         const color = i < currentIndex ? "green" : "red";
         fillDigit(i, pi[i], color);
     }
@@ -115,3 +130,22 @@ function resetGame() {
     updateLivesDisplay();
     updateMemorizedCount();
 }
+function setStartingPoint() {
+    const inputValue = parseInt(document.getElementById("start-digit").value, 10);
+    if (isNaN(inputValue) || inputValue < 1 || inputValue > pi.length) {
+        alert("Please enter a valid number between 1 and " + pi.length);
+        return;
+    }
+
+    startIndex = inputValue - 1; // because user says digit #1, but index is 0-based
+    currentIndex = startIndex;
+    lives = 5;
+
+    initializeGrid();
+    updateLivesDisplay();
+    updateMemorizedCount();
+    document.getElementById("feedback").textContent = "";
+    document.getElementById("input").value = "";
+    document.getElementById("input").disabled = false;
+}
+
